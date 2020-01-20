@@ -1,5 +1,6 @@
-package com.example.pagingtest2;
+package com.example.pagingtest2.user;
 
+import com.example.pagingtest2.user.User;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;

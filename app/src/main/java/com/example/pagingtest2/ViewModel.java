@@ -4,17 +4,31 @@ import androidx.lifecycle.LiveData;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
+import com.example.pagingtest2.pokemon.Pokemon;
+import com.example.pagingtest2.pokemon.PokemonDataFactory;
+import com.example.pagingtest2.pokemon.PokemonDataSource;
+
+import java.util.concurrent.Executor;
+
 public class ViewModel extends androidx.lifecycle.ViewModel {
 
-    LiveData<PagedList<User>> getUsers;
+    LiveData<PagedList<Pokemon>> getPokemons;
 
     public ViewModel() {
-        UserDataFactory userDataFactory = new UserDataFactory();
+        PokemonDataFactory pokemonDataFactory = new PokemonDataFactory();
         PagedList.Config config = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
-                .setPageSize(UserDataSource.PAGE_SIZE)
+                .setPageSize(PokemonDataSource.LIMIT)
+                .setPrefetchDistance(1)
                 .build();
 
-        getUsers = new LivePagedListBuilder<>(userDataFactory, config).build();
+        getPokemons = new LivePagedListBuilder<>(pokemonDataFactory, config)
+                .setFetchExecutor(new Executor() {
+                    @Override
+                    public void execute(Runnable runnable) {
+                        
+                    }
+                })
+                .build();
     }
 }

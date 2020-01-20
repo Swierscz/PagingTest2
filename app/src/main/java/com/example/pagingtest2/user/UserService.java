@@ -1,6 +1,6 @@
-package com.example.pagingtest2;
+package com.example.pagingtest2.user;
 
-import java.util.List;
+import com.example.pagingtest2.user.UserResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -1,11 +1,11 @@
-package com.example.pagingtest2;
+package com.example.pagingtest2.user;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.paging.DataSource;
 import androidx.paging.PageKeyedDataSource;
+
+import com.example.pagingtest2.RetrofitManager;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import retrofit2.Response;
 import static android.content.ContentValues.TAG;
 
 public class UserDataSource extends PageKeyedDataSource<Long, User> {
-    public static int PAGE_SIZE = 6;
+    public static int PAGE_SIZE = 3;
     public static long FIRST_PAGE = 1;
 
     @Override

@@ -1,4 +1,4 @@
-package com.example.pagingtest2;
+package com.example.pagingtest2.user;
 
 import androidx.annotation.NonNull;
 import androidx.paging.DataSource;
