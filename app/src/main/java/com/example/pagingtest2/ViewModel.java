@@ -1,6 +1,9 @@
 package com.example.pagingtest2;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
@@ -10,25 +13,27 @@ import com.example.pagingtest2.pokemon.PokemonDataSource;
 
 import java.util.concurrent.Executor;
 
-public class ViewModel extends androidx.lifecycle.ViewModel {
+import static android.content.ContentValues.TAG;
 
+public class ViewModel extends androidx.lifecycle.ViewModel {
+    private DataSource<Long, Pokemon> pokemonDataSource;
     LiveData<PagedList<Pokemon>> getPokemons;
+    PokemonDataFactory pokemonDataFactory;
 
     public ViewModel() {
-        PokemonDataFactory pokemonDataFactory = new PokemonDataFactory();
+        pokemonDataFactory = new PokemonDataFactory();
         PagedList.Config config = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
                 .setPageSize(PokemonDataSource.LIMIT)
                 .setPrefetchDistance(1)
                 .build();
 
+        pokemonDataSource = pokemonDataFactory.create();
         getPokemons = new LivePagedListBuilder<>(pokemonDataFactory, config)
-                .setFetchExecutor(new Executor() {
-                    @Override
-                    public void execute(Runnable runnable) {
-                        
-                    }
-                })
                 .build();
+    }
+
+    void invalidatePokemons() {
+        getPokemons.getValue().getDataSource().invalidate();
     }
 }

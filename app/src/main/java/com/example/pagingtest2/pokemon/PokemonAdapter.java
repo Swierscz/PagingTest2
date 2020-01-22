@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pagingtest2.R;
-import com.example.pagingtest2.user.User;
 
 public class PokemonAdapter extends PagedListAdapter<Pokemon, PokemonAdapter.ViewHolder> {
 

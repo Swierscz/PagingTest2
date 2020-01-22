@@ -1,5 +1,7 @@
 package com.example.pagingtest2.pokemon;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.paging.PageKeyedDataSource;
 
@@ -10,6 +12,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static android.content.ContentValues.TAG;
 
 public class PokemonDataSource extends PageKeyedDataSource<Long, Pokemon> {
     private final static long FIRST_PAGE = 1;
@@ -28,7 +32,7 @@ public class PokemonDataSource extends PageKeyedDataSource<Long, Pokemon> {
 
             @Override
             public void onFailure(Call<PokemonResponse> call, Throwable t) {
-
+                Log.i(TAG, "Failure");
             }
         });
 
@@ -57,7 +61,7 @@ public class PokemonDataSource extends PageKeyedDataSource<Long, Pokemon> {
 
             @Override
             public void onFailure(Call<PokemonResponse> call, Throwable t) {
-
+                Log.i(TAG, "Failure");
             }
         });
 
@@ -78,7 +82,7 @@ public class PokemonDataSource extends PageKeyedDataSource<Long, Pokemon> {
 
             @Override
             public void onFailure(Call<PokemonResponse> call, Throwable t) {
-
+                Log.i(TAG, "Failure");
             }
         });
 

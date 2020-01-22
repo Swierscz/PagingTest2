@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitManager {
 
 
-    private static final String URL = "https://pokeapi.co/api/v2/";
+    private static final String URL = "http://192.168.0.199:3000/api/";
     // Create Logger
 
     // Create OkHttp Client

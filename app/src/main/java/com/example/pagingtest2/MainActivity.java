@@ -1,6 +1,8 @@
 package com.example.pagingtest2;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
@@ -11,8 +13,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.pagingtest2.pokemon.PokemonAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    SwipeRefreshLayout swipeRefreshLayout ;
-
+    private static final String TAG = "elo" ;
+    SwipeRefreshLayout swipeRefreshLayout;
+    ViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,12 +23,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         swipeRefreshLayout = findViewById(R.id.swipe_layout);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-            }
-        });
+        viewModel = ViewModelProviders.of(this).get(ViewModel.class);
+        swipeRefreshLayout.setOnRefreshListener(() -> viewModel.invalidatePokemons());
 
         RecyclerView recyclerView = findViewById(R.id.rv_users);
         final PokemonAdapter adapter = new PokemonAdapter();
@@ -33,8 +32,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
 
-        ViewModel viewModel = ViewModelProviders.of(this).get(ViewModel.class);
 
-        viewModel.getPokemons.observe(this, adapter::submitList);
+
+        viewModel.getPokemons.observe(this, pagedList -> {
+            Toast.makeText(getBaseContext(), "Whoah", Toast.LENGTH_SHORT).show();
+            adapter.submitList(pagedList);
+            swipeRefreshLayout.setRefreshing(false);
+        });
     }
 }
