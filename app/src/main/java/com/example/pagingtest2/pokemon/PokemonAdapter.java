@@ -31,7 +31,7 @@ public class PokemonAdapter extends PagedListAdapter<Pokemon, PokemonAdapter.Vie
     public void onBindViewHolder(@NonNull PokemonAdapter.ViewHolder holder, int position) {
         if(getItem(position) != null){
             holder.name.setText(getItem(position).getName());
-            holder.lastname.setText(getItem(position).getUrl());
+            holder.lastname.setText(String.valueOf(getItem(position).getUrl()));
         }
     }
 

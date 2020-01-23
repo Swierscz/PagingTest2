@@ -16,7 +16,6 @@ import java.util.concurrent.Executor;
 import static android.content.ContentValues.TAG;
 
 public class ViewModel extends androidx.lifecycle.ViewModel {
-    private DataSource<Long, Pokemon> pokemonDataSource;
     LiveData<PagedList<Pokemon>> getPokemons;
     PokemonDataFactory pokemonDataFactory;
 
@@ -28,7 +27,6 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
                 .setPrefetchDistance(1)
                 .build();
 
-        pokemonDataSource = pokemonDataFactory.create();
         getPokemons = new LivePagedListBuilder<>(pokemonDataFactory, config)
                 .build();
     }
