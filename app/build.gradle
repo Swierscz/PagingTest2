@@ -47,9 +47,12 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-reactivestreams:$lifecycle_version"
 
+    implementation 'io.reactivex.rxjava2:rxjava:2.x.x'
+    implementation 'com.github.markomilos:paginate:0.5.1'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     def room_version = "2.2.3"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation 'net.sourceforge.streamsupport:streamsupport:1.7.1'
 }

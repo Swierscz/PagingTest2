@@ -1,9 +1,9 @@
 package com.example.pagingtest2.pokemon;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-
-import com.google.gson.annotations.SerializedName;
+import androidx.room.PrimaryKey;
 
 import java.util.Objects;
 
@@ -11,23 +11,22 @@ import java.util.Objects;
 public class Pokemon {
     @ColumnInfo(name = "id")
     private String name;
+    @PrimaryKey
+    @NonNull
     @ColumnInfo(name = "url")
-    private Long url;
+    private String url;
+
+    public Pokemon(String name, @NonNull String url) {
+        this.name = name;
+        this.url = url;
+    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Long getUrl() {
+    public String getUrl() {
         return url;
-    }
-
-    public void setUrl(Long url) {
-        this.url = url;
     }
 
     @Override

@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         swipeRefreshLayout = findViewById(R.id.swipe_layout);
+        RepositoryProvider.getInstance().initDatabase(getBaseContext());
 
         viewModel = ViewModelProviders.of(this).get(ViewModel.class);
         swipeRefreshLayout.setOnRefreshListener(() -> viewModel.invalidatePokemons());
@@ -35,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         viewModel.getPokemons.observe(this, pagedList -> {
-            Toast.makeText(getBaseContext(), "Whoah", Toast.LENGTH_SHORT).show();
             adapter.submitList(pagedList);
             swipeRefreshLayout.setRefreshing(false);
         });

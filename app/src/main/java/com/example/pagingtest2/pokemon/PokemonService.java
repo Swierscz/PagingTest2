@@ -6,7 +6,7 @@ import retrofit2.http.Query;
 
 public interface PokemonService {
 
-    @GET("/users")
+    @GET("/api/v2/pokemon")
     Call<PokemonResponse> getPokemons(@Query("offset") long offset, @Query("limit") long limit);
 
 }
