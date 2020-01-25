@@ -14,6 +14,6 @@ public interface PokemonDao {
     @Query("Select * from pokemons order by url desc")
     DataSource.Factory<Integer, Pokemon> selectPaged();
 
-    @Insert
+    @Insert(onConflict = 5)
     void insert(Pokemon pokemon);
 }

@@ -55,4 +55,5 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation 'net.sourceforge.streamsupport:streamsupport:1.7.1'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }

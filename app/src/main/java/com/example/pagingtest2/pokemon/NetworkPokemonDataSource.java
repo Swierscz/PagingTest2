@@ -9,6 +9,7 @@ import androidx.paging.PageKeyedDataSource;
 import com.example.pagingtest2.FetchDataStatus;
 import com.example.pagingtest2.RetrofitManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.subjects.ReplaySubject;
@@ -30,21 +31,28 @@ public class NetworkPokemonDataSource extends PageKeyedDataSource<Long, Pokemon>
 
     @Override
     public void loadInitial(@NonNull LoadInitialParams<Long> params, @NonNull LoadInitialCallback<Long, Pokemon> callback) {
+        Log.i(TAG, "LOAD INITIAL");
         fetchDataStatus.postValue(LOADING);
         PokemonService service = RetrofitManager.buildService(PokemonService.class);
         Call<PokemonResponse> call = service.getPokemons(0, LIMIT);
         call.enqueue(new Callback<PokemonResponse>() {
             @Override
             public void onResponse(Call<PokemonResponse> call, Response<PokemonResponse> response) {
-                List<Pokemon> pokemons = response.body().pokemons;
-                stream(pokemons).forEach(pokemonObservable::onNext);
-                callback.onResult(pokemons, null, FIRST_PAGE + 1);
-                fetchDataStatus.postValue(LOADED_SUCCESSFULLY);
+                if (response.body() != null) {
+                    List<Pokemon> pokemons = response.body().pokemons;
+                    stream(pokemons).forEach(pokemonObservable::onNext);
+                    callback.onResult(pokemons, null, FIRST_PAGE + 1);
+                    fetchDataStatus.postValue(LOADED_SUCCESSFULLY);
+                } else {
+                    callback.onResult(new ArrayList<>(), null, FIRST_PAGE);
+                }
+
             }
 
             @Override
             public void onFailure(Call<PokemonResponse> call, Throwable t) {
                 fetchDataStatus.postValue(new FetchDataStatus(FAILED, t.getMessage()));
+                callback.onResult(new ArrayList<>(), null, FIRST_PAGE);
             }
         });
 
@@ -52,6 +60,7 @@ public class NetworkPokemonDataSource extends PageKeyedDataSource<Long, Pokemon>
 
     @Override
     public void loadBefore(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Long, Pokemon> callback) {
+        Log.i(TAG, "LOAD BEFORE");
         fetchDataStatus.postValue(LOADING);
         PokemonService service = RetrofitManager.buildService(PokemonService.class);
         Call<PokemonResponse> call = service.getPokemons(params.key * 20, LIMIT);
@@ -85,6 +94,7 @@ public class NetworkPokemonDataSource extends PageKeyedDataSource<Long, Pokemon>
 
     @Override
     public void loadAfter(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Long, Pokemon> callback) {
+        Log.i(TAG, "LOAD AFTER");
         fetchDataStatus.postValue(LOADING);
         PokemonService service = RetrofitManager.buildService(PokemonService.class);
         Call<PokemonResponse> call = service.getPokemons(params.key * 20, LIMIT);

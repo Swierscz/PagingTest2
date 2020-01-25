@@ -1,8 +1,6 @@
 package com.example.pagingtest2;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
@@ -13,7 +11,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.pagingtest2.pokemon.PokemonAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "elo" ;
+    private static final String TAG = "elo";
     SwipeRefreshLayout swipeRefreshLayout;
     ViewModel viewModel;
 
@@ -25,14 +23,15 @@ public class MainActivity extends AppCompatActivity {
         RepositoryProvider.getInstance().initDatabase(getBaseContext());
 
         viewModel = ViewModelProviders.of(this).get(ViewModel.class);
-        swipeRefreshLayout.setOnRefreshListener(() -> viewModel.invalidatePokemons());
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            viewModel.invalidatePokemons();
+            swipeRefreshLayout.setRefreshing(false);
+        });
 
         RecyclerView recyclerView = findViewById(R.id.rv_users);
         final PokemonAdapter adapter = new PokemonAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
-
-
 
 
         viewModel.getPokemons.observe(this, pagedList -> {

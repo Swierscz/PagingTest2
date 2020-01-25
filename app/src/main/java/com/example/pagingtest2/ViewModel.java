@@ -3,32 +3,31 @@ package com.example.pagingtest2;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
 import com.example.pagingtest2.pokemon.NetworkPokemonDataSource;
 import com.example.pagingtest2.pokemon.Pokemon;
-import com.example.pagingtest2.pokemon.PokemonNetworkDataFactory;
 
-import io.reactivex.schedulers.Schedulers;
+import java.util.List;
 
-import static android.content.ContentValues.TAG;
+import static java8.util.stream.StreamSupport.stream;
 
 public class ViewModel extends androidx.lifecycle.ViewModel {
+    public final static String TAG = ViewModel.class.getSimpleName();
     MediatorLiveData<PagedList<Pokemon>> getPokemons = new MediatorLiveData<>();
-    PokemonNetworkDataFactory pokemonNetworkDataFactory;
-    PokemonDao pokemonDao;
-    PagedList.BoundaryCallback boundaryCallback;
+    NetworkDirectRepo networkDirectRepo;
+    NetworkRepo networkRepo;
+    DbRepo dbRepo;
 
-    LiveData<PagedList<Pokemon>> networkPokemons;
-    LiveData<PagedList<Pokemon>> dbPokemons;
+
+    PagedList.BoundaryCallback boundaryCallback;
 
     @SuppressLint("CheckResult")
     public ViewModel() {
-        pokemonNetworkDataFactory = new PokemonNetworkDataFactory();
-        pokemonDao = RepositoryProvider.getInstance().getAppDatabase().pokemonDao();
+
+
         PagedList.Config config = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
                 .setPageSize(NetworkPokemonDataSource.LIMIT)
@@ -37,21 +36,29 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
 
         boundaryCallback = getBoundaryCallback();
 
-        LivePagedListBuilder<Long, Pokemon> livePagedListBuilder = new LivePagedListBuilder<>(pokemonNetworkDataFactory, config);
-        livePagedListBuilder.setBoundaryCallback(boundaryCallback);
-        networkPokemons = livePagedListBuilder.build();
+        dbRepo = new DbRepo(config, boundaryCallback);
+        getPokemons.addSource(dbRepo.pokemons, getPokemons::setValue);
 
 
-        LivePagedListBuilder<Long, Pokemon> livePagedListBuilderDb = new LivePagedListBuilder<>(pokemonDao.selectPaged(), config);
-        dbPokemons = livePagedListBuilderDb.build();
-
-        getPokemons.addSource(networkPokemons, value ->
-                getPokemons.setValue(value));
-
-        pokemonNetworkDataFactory.source.pokemonObservable.observeOn(Schedulers.io())
-                .subscribe(pokemon -> {
-                    pokemonDao.insert(pokemon);
+        networkDirectRepo = new NetworkDirectRepo(new NetworkDirectRepo.Callback() {
+            @Override
+            public void onSuccess(List<Pokemon> pokemons) {
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        stream(pokemons).forEach(pokemon -> {
+                            Log.i(TAG, "Pokemon: " + pokemon.getName() + " inserted");
+                            dbRepo.pokemonDao.insert(pokemon);
+                        });
+                    }
                 });
+            }
+
+            @Override
+            public void onError(String errorMsg) {
+                Log.i(TAG, "Error during fetching network data");
+            }
+        });
 
     }
 
@@ -59,17 +66,28 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
         getPokemons.getValue().getDataSource().invalidate();
     }
 
+    void requestData() {
+        if (!NetworkCache.isLoading) {
+            networkDirectRepo.requestData(NetworkCache.offset++, 20);
+            NetworkCache.isLoading = true;
+        }
+    }
+
     PagedList.BoundaryCallback<Pokemon> getBoundaryCallback() {
         return new PagedList.BoundaryCallback<Pokemon>() {
             @Override
             public void onZeroItemsLoaded() {
                 super.onZeroItemsLoaded();
-                Log.i(TAG, "ZERO LOADED");
+                requestData();
+                Log.i(TAG, "Zero items loaded");
+            }
 
-                getPokemons.addSource(dbPokemons, value -> {
-                    getPokemons.setValue(value);
-                    getPokemons.removeSource(dbPokemons);
-                });
+
+            @Override
+            public void onItemAtEndLoaded(@NonNull Pokemon itemAtEnd) {
+                Log.i(TAG, "Items at end loaded");
+                requestData();
+                super.onItemAtEndLoaded(itemAtEnd);
             }
         };
     }
