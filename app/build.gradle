@@ -56,4 +56,12 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation 'net.sourceforge.streamsupport:streamsupport:1.7.1'
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
+    compile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
+
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
+    implementation "androidx.preference:preference:1.1.0"
 }

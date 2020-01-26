@@ -11,9 +11,12 @@ import com.example.pagingtest2.pokemon.Pokemon;
 @Dao
 public interface PokemonDao {
 
-    @Query("Select * from pokemons order by url desc")
+    @Query("Select * from pokemons")
     DataSource.Factory<Integer, Pokemon> selectPaged();
 
     @Insert(onConflict = 5)
     void insert(Pokemon pokemon);
+
+    @Query("Delete from pokemons")
+    void nukeTable();
 }

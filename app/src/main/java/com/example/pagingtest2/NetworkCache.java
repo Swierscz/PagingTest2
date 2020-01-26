@@ -16,7 +16,7 @@ public class NetworkCache {
 
 
     public static boolean isLoading = false;
-    public static int offset = 1;
+    public static int offset = 0;
 
 
 }

@@ -16,9 +16,8 @@ import static com.example.pagingtest2.pokemon.NetworkPokemonDataSource.LIMIT;
 
 public class NetworkDirectRepo {
     public final static String TAG = NetworkDirectRepo.class.getSimpleName();
-    PokemonService service = RetrofitManager.buildService(PokemonService.class);
-    Call<PokemonResponse> call = service.getPokemons(0, LIMIT);
-    Callback callback;
+    private PokemonService service = RetrofitManager.buildService(PokemonService.class);
+    private Callback callback;
 
     interface Callback {
         void onSuccess(List<Pokemon> pokemons);
@@ -26,12 +25,12 @@ public class NetworkDirectRepo {
         void onError(String errorMsg);
     }
 
-    public NetworkDirectRepo(Callback callback) {
+    NetworkDirectRepo(Callback callback) {
         this.callback = callback;
     }
 
     void requestData(int offset, int limit) {
-        service.getPokemons(offset, limit).enqueue(new retrofit2.Callback<PokemonResponse>() {
+        service.getPokemons(offset * limit, limit).enqueue(new retrofit2.Callback<PokemonResponse>() {
             @Override
             public void onResponse(Call<PokemonResponse> call, Response<PokemonResponse> response) {
                 Log.i(TAG, "Request succed");

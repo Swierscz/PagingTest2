@@ -4,58 +4,59 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.paging.PagedList;
 
-import com.example.pagingtest2.pokemon.NetworkPokemonDataSource;
 import com.example.pagingtest2.pokemon.Pokemon;
 
 import java.util.List;
 
 import static java8.util.stream.StreamSupport.stream;
 
+
 public class ViewModel extends androidx.lifecycle.ViewModel {
-    public final static String TAG = ViewModel.class.getSimpleName();
-    MediatorLiveData<PagedList<Pokemon>> getPokemons = new MediatorLiveData<>();
-    NetworkDirectRepo networkDirectRepo;
-    NetworkRepo networkRepo;
-    DbRepo dbRepo;
+    private final static String TAG = ViewModel.class.getSimpleName();
+    private static final int PAGE_SIZE = 20;
+    private static final int FETCH_SIZE = 50;
 
+    LiveData<PagedList<Pokemon>> getPokemons;
+    private NetworkDirectRepo networkDirectRepo;
+    private DbRepo dbRepo;
+    MutableLiveData<Boolean> isLoadingVisible = new MutableLiveData<>(false);
+    private int offset = NetworkCache.offset;
 
-    PagedList.BoundaryCallback boundaryCallback;
 
     @SuppressLint("CheckResult")
     public ViewModel() {
 
 
         PagedList.Config config = new PagedList.Config.Builder()
+                .setPageSize(PAGE_SIZE)
                 .setEnablePlaceholders(false)
-                .setPageSize(NetworkPokemonDataSource.LIMIT)
-                .setPrefetchDistance(10)
                 .build();
 
-        boundaryCallback = getBoundaryCallback();
-
-        dbRepo = new DbRepo(config, boundaryCallback);
-        getPokemons.addSource(dbRepo.pokemons, getPokemons::setValue);
-
+        dbRepo = new DbRepo(config, getBoundaryCallback());
+        getPokemons = dbRepo.pokemons;
 
         networkDirectRepo = new NetworkDirectRepo(new NetworkDirectRepo.Callback() {
             @Override
             public void onSuccess(List<Pokemon> pokemons) {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        stream(pokemons).forEach(pokemon -> {
-                            Log.i(TAG, "Pokemon: " + pokemon.getName() + " inserted");
-                            dbRepo.pokemonDao.insert(pokemon);
-                        });
-                    }
+                Thread thread = new Thread(() -> {
+                    stream(pokemons).forEach(pokemon -> {
+                        dbRepo.pokemonDao.insert(pokemon);
+                    });
+                    isLoadingVisible.postValue(false);
+                    NetworkCache.isLoading = false;
                 });
+                thread.start();
+
             }
 
             @Override
             public void onError(String errorMsg) {
+                isLoadingVisible.postValue(false);
                 Log.i(TAG, "Error during fetching network data");
             }
         });
@@ -63,12 +64,20 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     }
 
     void invalidatePokemons() {
+        dbRepo.pokemonDao.nukeTable();
+        requestData();
         getPokemons.getValue().getDataSource().invalidate();
+        offsetLiveData.postValue(0);
     }
 
-    void requestData() {
+
+    MutableLiveData<Integer> offsetLiveData = new MutableLiveData<>();
+
+    private void requestData() {
         if (!NetworkCache.isLoading) {
-            networkDirectRepo.requestData(NetworkCache.offset++, 20);
+            isLoadingVisible.postValue(true);
+            networkDirectRepo.requestData(offset++, FETCH_SIZE);
+            offsetLiveData.postValue(offset);
             NetworkCache.isLoading = true;
         }
     }
@@ -85,9 +94,9 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
 
             @Override
             public void onItemAtEndLoaded(@NonNull Pokemon itemAtEnd) {
+                super.onItemAtEndLoaded(itemAtEnd);
                 Log.i(TAG, "Items at end loaded");
                 requestData();
-                super.onItemAtEndLoaded(itemAtEnd);
             }
         };
     }
