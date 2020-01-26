@@ -5,7 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.PagedList;
 
@@ -44,6 +43,12 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
             @Override
             public void onSuccess(List<Pokemon> pokemons) {
                 Thread thread = new Thread(() -> {
+                    if (shouldInvalidate) {
+                        dbRepo.pokemonDao.nukeTable();
+                        shouldInvalidate = false;
+                    }
+
+
                     stream(pokemons).forEach(pokemon -> {
                         dbRepo.pokemonDao.insert(pokemon);
                     });
@@ -60,14 +65,16 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
                 Log.i(TAG, "Error during fetching network data");
             }
         });
-
     }
 
+
+    private boolean shouldInvalidate = false;
+
     void invalidatePokemons() {
-        dbRepo.pokemonDao.nukeTable();
-        requestData();
-        getPokemons.getValue().getDataSource().invalidate();
+        shouldInvalidate = true;
+        offset = 0;
         offsetLiveData.postValue(0);
+        requestData();
     }
 
 
